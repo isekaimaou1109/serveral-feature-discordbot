@@ -26,6 +26,16 @@ const cli = {
     usage: '!list',
     description: 'Dòng lệnh này liệt kê ra danh sách thành viên trong server này.',
     about: ">> Dòng lệnh này không có tham số."
+  },
+  kick: {
+    usage: '!kick',
+    description: 'Dòng lệnh này để kích bất kì ai (Yêu cầu có quyền Administrator)',
+    about: ">> <tên user>"
+  },
+  ban: {
+    usage: '!ban',
+    description: 'Dòng lệnh này để tạm thời khóa 1 ai đó (Yêu cầu có quyền Administrator)',
+    about: ">> Dòng lệnh này không có tham số."
   }
 }
 
@@ -59,7 +69,7 @@ client.on("messageCreate", async function(message) {
       "Có nên chơi game fps hay không? " + (fps > 60 ? "không" : "có")
     )
   }
-  
+
   /* clear messages */
   if(command === 'clear') {
     message.reply("bubu")
@@ -92,21 +102,44 @@ client.on("messageCreate", async function(message) {
       message.reply("Không cho nó về lâu đài tình ái à :v")
       return;
     }
-
     // console.log("you are " + message.member.permissions.has(Discord.Permissions.FLAGS.ADMINISTRATOR))
     if(args && args[0] && typeof args[0] == 'string') {
       if(message.member.permissions.has(Discord.Permissions.FLAGS.ADMINISTRATOR)) {
-        const members = await message.guild.members.list()
-        console.log(members)
+        const guildMembers = await message.guild.members.search({
+          query: args[0]
+        })
+
+        guildMembers.forEach(guild => {
+          guild.kick()
+          /* kick wibuu */
+        })
       }
     }
 
     return;
   }
 
-  // /* ban a user */
+  /* ban a user */
   if(command === 'ban') {
-    // message.guild.members.ban()
+    if(!args) {
+      message.reply("Không cho nó về lâu đài tình ái à :v")
+      return;
+    }
+    // console.log("you are " + message.member.permissions.has(Discord.Permissions.FLAGS.ADMINISTRATOR))
+    if(args && args[0] && typeof args[0] == 'string') {
+      if(message.member.permissions.has(Discord.Permissions.FLAGS.ADMINISTRATOR)) {
+        const guildMembers = await message.guild.members.search({
+          query: args[0]
+        })
+
+        guildMembers.forEach(guild => {
+          guild.ban()
+          /* kick wibuu */
+        })
+      }
+    }
+
+    return;
   }
 
   /* list a user list */
@@ -126,7 +159,7 @@ client.on("messageCreate", async function(message) {
   /* show command table */
   if(command === 'help') {
     /* go detail to each command */
-    if(args && args[0] === 'detail' && args[1] && typeof args[1] === 'string' && /(list|clear|checkspeed)/gm.test(args[1])) {
+    if(args && args[0] === 'detail' && args[1] && typeof args[1] === 'string' && /(list|clear|checkspeed|kick|ban)/gm.test(args[1])) {
       message.reply(
         "\`\`\`ini\n" + 
         "Cách dùng: " + cli[args[1]].usage + "\n" +
@@ -141,7 +174,9 @@ client.on("messageCreate", async function(message) {
       ['list', 'Dùng để liệt kê thành viên'],
       ['help', 'Mở bảng giúp đỡ'],
       ['clear', 'Xóa tin nhắn'],
-      ['checkspeed', 'Kiểm tra tốc độ mạng']
+      ['checkspeed', 'Kiểm tra tốc độ mạng'],
+      ['kick', 'Đá đít wibu'],
+      ['ban', 'Block daddy']
     ];
 
     const embed = new Discord.MessageEmbed({
